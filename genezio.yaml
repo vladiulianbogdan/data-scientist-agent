@@ -19,7 +19,6 @@ backend:
     language:
         name: python
         packageManager: pip
-        runtime: python3.9.x
     functions:
         - name: fastapi
           path: .
