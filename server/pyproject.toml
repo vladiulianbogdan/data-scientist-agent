@@ -1,0 +1,26 @@
+[project]
+name = "data-scientist-agent"
+version = "0.1.0"
+description = "Your own data scientist agent that runs code to analyze structured data files."
+authors = [
+    {name = "bogdan@genez.io"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.9,<3.10"
+dependencies = [
+    "langgraph (>=0.2.68,<0.3.0)",
+    "langchain-anthropic (>=0.3.4,<0.4.0)",
+    "fastapi (>=0.115.8,<0.116.0)",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "langchain-community @ file:///Users/iulian-bogdanvlad/Documents/langchain/libs/community"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+langchain-community = {develop = true}

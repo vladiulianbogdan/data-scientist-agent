@@ -1,0 +1,28 @@
+name: data-scientist-agent
+region: us-east-1
+yamlVersion: 2
+frontend:
+    path: client
+    publish: dist
+    scripts:
+        deploy:
+            - npm install
+        build:
+            - npm run build
+        start:
+            - npm install
+            - npm run dev
+    environment:
+        VITE_API_URL_FASTAPI: ${{ backend.functions.fastapi.url }}
+backend:
+    path: server
+    language:
+        name: python
+        packageManager: pip
+        runtime: python3.9.x
+    functions:
+        - name: fastapi
+          path: .
+          handler: app
+          entry: index.py
+          type: httpServer
