@@ -1,4 +1,4 @@
-from langchain_community.tools.genezio import RunPythonCodeTool
+from langchain_genezio_code_interpreter import GenezioPythonInterpreter
 from langchain_anthropic import ChatAnthropic
 from fastapi import FastAPI
 from fastapi import FastAPI, HTTPException
@@ -28,7 +28,7 @@ class State(TypedDict):
 graph_builder = StateGraph(State)
 
 # Deploy the project from https://github.com/vladiulianbogdan/python-eval and set the URL here.
-tool=RunPythonCodeTool(
+tool=GenezioPythonInterpreter(
     url="https://1e14605c-be2b-440b-b7c1-1105f95923c2.us-east-1.cloud.genez.io/execute",
     librariesAlreadyInstalled=["matplotlib", "pandas"])
 tools = [tool]
@@ -144,6 +144,7 @@ def stream_graph_updates(user_input: str, thread_id, files: Optional[List[Upload
             config
         ):
             for value in event.values():
+                print(value)
                 lastMessage = value["messages"][-1]
                 if lastMessage.type == "tool":
                     jsonContent = json.loads(lastMessage.content)
@@ -163,8 +164,9 @@ async def generate_response(
     responses, file_outputs = stream_graph_updates(input, 100, files=files)
     fs = {}
 
-    for filename, content in file_outputs.items():
-        fs[filename] = content
+    if hasattr(file_outputs, "items") and callable(file_outputs.items):
+        for filename, content in file_outputs.items():
+            fs[filename] = content
 
     response_data = {
         "messages": responses,
