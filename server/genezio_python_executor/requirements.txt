@@ -1,0 +1,10 @@
+Flask==3.0.3
+requests
+bs4
+BeautifulSoup4
+lxml
+fastapi
+requests_toolbelt
+python-multipart
+matplotlib
+pandas

@@ -1,0 +1,15 @@
+backend:
+    functions:
+        - entry: index.py
+          handler: app
+          name: flask-function
+          path: ./
+          type: httpServer
+          maxConcurrentRequestsPerInstance: 1
+    language:
+        name: python
+        packageManager: pip
+    path: ./
+name: python-eval
+region: us-east-1
+yamlVersion: 2
