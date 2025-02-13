@@ -70,7 +70,7 @@ const ChatInterface: React.FC = () => {
     }
   
     try {
-      const response = await fetch("http://127.0.0.1:5043/generate", {
+      const response = await fetch(import.meta.env.VITE_API_URL_FASTAPI + "/generate", {
         method: "POST",
         body: formData,
       });

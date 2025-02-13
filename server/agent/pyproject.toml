@@ -14,8 +14,12 @@ dependencies = [
     "fastapi (>=0.115.8,<0.116.0)",
     "uvicorn (>=0.34.0,<0.35.0)",
     "python-multipart (>=0.0.20,<0.0.21)",
-    "langchain_genezio_code_interpreter @ file:///Users/iulian-bogdanvlad/Documents/langchain-genezio-code-interpreter",
-    "python-dotenv (>=1.0.1,<2.0.0)"
+    "python-dotenv (>=1.0.1,<2.0.0)",
+    "langchain-genezio (>=0.1.2,<0.2.0)"
+]
+
+packages = [
+    { include = "data_scientist_agent" }
 ]
 
 [build-system]

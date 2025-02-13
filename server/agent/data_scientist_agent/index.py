@@ -1,4 +1,7 @@
-from langchain_genezio_code_interpreter import GenezioPythonInterpreter
+import base64
+import os
+import json
+from langchain_genezio import GenezioInterpreter
 from langchain_anthropic import ChatAnthropic
 from fastapi import FastAPI
 from fastapi import FastAPI, HTTPException
@@ -7,8 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Annotated
 from langgraph.prebuilt import ToolNode 
-import base64
-import json
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
@@ -27,9 +28,8 @@ class State(TypedDict):
 
 graph_builder = StateGraph(State)
 
-# Deploy the project from https://github.com/vladiulianbogdan/python-eval and set the URL here.
-tool=GenezioPythonInterpreter(
-    url="https://1e14605c-be2b-440b-b7c1-1105f95923c2.us-east-1.cloud.genez.io/execute",
+tool=GenezioInterpreter(
+    url=os.environ["GENEZIO_PYTHON_EXECUTOR_URL"] + "/execute",
     librariesAlreadyInstalled=["matplotlib", "pandas"])
 tools = [tool]
 

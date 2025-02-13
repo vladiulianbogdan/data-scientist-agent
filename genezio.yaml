@@ -1,13 +1,22 @@
 backend:
+    environment:
+        GENEZIO_PYTHON_EXECUTOR_URL: ${{ backend.functions.executor.url }}
     functions:
-        - entry: index.py
+        - entry: agent/data_scientist_agent/index.py
           handler: app
           name: fastapi
           path: .
           type: httpServer
+        - entry: genezio_python_executor/index.py
+          handler: app
+          name: executor 
+          path: ./
+          type: httpServer
+          maxConcurrentRequestsPerInstance: 1
     language:
         name: python
         packageManager: pip
+        runtime: python3.11.x
     path: server
 frontend:
     environment:
