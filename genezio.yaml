@@ -9,10 +9,10 @@ backend:
           type: httpServer
         - entry: index.py
           handler: app
-          name: executor 
+          maxConcurrentRequestsPerInstance: 1
+          name: executor
           path: ./genezio_python_executor
           type: httpServer
-          maxConcurrentRequestsPerInstance: 1
     language:
         name: python
         packageManager: pip
