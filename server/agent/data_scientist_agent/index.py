@@ -152,6 +152,7 @@ def stream_graph_updates(user_input: str, thread_id, files: Optional[List[Upload
                 else:
                     responses.append(lastMessage.content)
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
     
     return responses, file_outputs
