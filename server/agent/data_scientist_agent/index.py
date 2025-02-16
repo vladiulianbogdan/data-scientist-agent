@@ -145,7 +145,6 @@ def stream_graph_updates(user_input: str, thread_id, files: Optional[List[Upload
             config
         ):
             for value in event.values():
-                print(value)
                 lastMessage = value["messages"][-1]
                 if lastMessage.type == "tool":
                     jsonContent = json.loads(lastMessage.content)
