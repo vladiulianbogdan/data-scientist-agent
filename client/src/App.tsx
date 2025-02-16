@@ -14,7 +14,10 @@ interface FileInfo {
   type: string;
 }
 
-const LOADING_MESSAGE = { text: 'Generating response...', sender: 'agent' };
+const LOADING_MESSAGE: Message = {
+  text: 'Generating response...',
+  sender: 'agent',
+};
 
 const ChatInterface: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
