@@ -6,6 +6,7 @@ backend:
           path: ./
           type: httpServer
           maxConcurrentRequestsPerInstance: 1
+          cooldownTime: 200
     language:
         name: python
         packageManager: pip
