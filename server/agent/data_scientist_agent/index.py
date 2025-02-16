@@ -1,6 +1,7 @@
 import base64
 import os
 import json
+import traceback
 from langchain_genezio import GenezioInterpreter
 from langchain_anthropic import ChatAnthropic
 from fastapi import FastAPI
@@ -153,6 +154,7 @@ def stream_graph_updates(user_input: str, thread_id, files: Optional[List[Upload
                     responses.append(lastMessage.content)
     except Exception as e:
         print(e)
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
     
     return responses, file_outputs
