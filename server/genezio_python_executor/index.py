@@ -129,4 +129,6 @@ async def execute(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error executing code: {str(e)}")
     finally:
-        shutil.rmtree(UPLOAD_DIR, ignore_errors=True)  # Cleanup after execution
+        print("Begin cleanup")
+        shutil.rmtree(UPLOAD_DIR)  # Cleanup after execution
+        print("Finish cleanup")
