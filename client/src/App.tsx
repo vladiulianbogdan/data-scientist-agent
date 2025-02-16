@@ -1,3 +1,6 @@
+import React, { useState, useRef } from 'react';
+import { Send, Paperclip, X } from 'lucide-react';
+
 interface Message {
   text: string;
   sender: 'user' | 'agent';
@@ -11,8 +14,7 @@ interface FileInfo {
   type: string;
 }
 
-import React, { useState, useRef } from 'react';
-import { Send, Paperclip, X } from 'lucide-react';
+const LOADING_MESSAGE = { text: 'Generating response...', sender: 'agent' };
 
 const ChatInterface: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -20,32 +22,40 @@ const ChatInterface: React.FC = () => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [files, setFiles] = useState<FileInfo[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSend = async (): Promise<void> => {
     if (!input.trim() && files.length === 0) return;
-    
+
     const newMessage: Message = { text: input, sender: 'user', files };
     setMessages([...messages, newMessage]);
-    
-    // Mock API request
-    const answers: any= await sendMessageToServer(newMessage);
-    setMessages(prev => [...prev, ...answers]);
-    
+
+    // Clear input and files immediately
     setInput('');
     setFiles([]);
+    setIsLoading(true);
+    setMessages((prev) => [...prev, LOADING_MESSAGE]);
+
+    // API request
+    const answers: any = await sendMessageToServer(newMessage);
+    setMessages((prev) => [
+      ...prev.filter((msg) => msg !== LOADING_MESSAGE),
+      ...answers,
+    ]);
+    setIsLoading(false);
   };
 
   const handleFiles = (newFiles: FileList): void => {
-    const fileList: FileInfo[] = Array.from(newFiles).map(file => ({
+    const fileList: FileInfo[] = Array.from(newFiles).map((file) => ({
       name: file.name,
       data: new Blob([file], { type: file.type }),
-      type: file.type
+      type: file.type,
     }));
-    setFiles(prevFiles => [...prevFiles, ...fileList]);
+    setFiles((prevFiles) => [...prevFiles, ...fileList]);
   };
 
   const removeFile = (index: number): void => {
-    setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>): void => {
@@ -61,62 +71,62 @@ const ChatInterface: React.FC = () => {
 
   const sendMessageToServer = async (message: Message) => {
     const formData = new FormData();
-    formData.append("input", message.text);
-  
+    formData.append('input', message.text);
+
     if (message.files) {
       for (const file of message.files) {
-        formData.append("files", file.data, file.name);
+        formData.append('files', file.data, file.name);
       }
     }
-  
+
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL_FASTAPI + "/generate", {
-        method: "POST",
-        body: formData,
-      });
-  
+      const response = await fetch(
+        import.meta.env.VITE_API_URL_FASTAPI + '/generate',
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`Server error: ${response.statusText}`);
       }
-  
+
       const responseData = await response.json();
-  
+
       // Extract messages and files
       const message: Message = {
-          text: responseData.messages[responseData.messages.length - 1],
-          sender: 'agent',
-          files: [],
-          images: [],
-      }
+        text: responseData.messages[responseData.messages.length - 1],
+        sender: 'agent',
+        files: [],
+        images: [],
+      };
 
       for (const x of Object.keys(responseData.files)) {
-        message.images!.push("data:image/png;base64," + responseData.files[x]);
+        message.images!.push('data:image/png;base64,' + responseData.files[x]);
       }
-  
+
       return [message];
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
       return [];
     }
   };
-  
-
-
 
   const MessageContent: React.FC<{ message: Message }> = ({ message }) => (
-    <div 
+    <div
       className={`inline-block p-3 rounded-lg ${
-        message.sender === 'user' 
-          ? 'bg-blue-500 text-white' 
+        message.sender === 'user'
+          ? 'bg-blue-500 text-white'
           : 'bg-gray-200 text-gray-800'
       }`}
     >
       <div>{message.text}</div>
-      
+
       {message.images && (
         <div className="mt-2">
           {message.images.map((img, i) => (
-            <img 
+            <img
               key={i}
               src={img}
               alt="Response image"
@@ -125,7 +135,7 @@ const ChatInterface: React.FC = () => {
           ))}
         </div>
       )}
-      
+
       {message.files && (
         <div className="text-sm mt-2">
           {message.files.map((file, i) => (
@@ -140,22 +150,26 @@ const ChatInterface: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
-      <div 
-        className={`flex-1 overflow-y-auto mb-4 p-4 border rounded-lg ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+      <div
+        className={`flex-1 overflow-y-auto mb-4 p-4 border rounded-lg ${
+          isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+        }`}
         onDrop={handleFileDrop}
         onDragOver={handleDragOver}
         onDragLeave={() => setIsDragging(false)}
       >
         {messages.map((message, index) => (
-          <div 
+          <div
             key={index}
-            className={`mb-4 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}
+            className={`mb-4 ${
+              message.sender === 'user' ? 'text-right' : 'text-left'
+            }`}
           >
             <MessageContent message={message} />
           </div>
         ))}
       </div>
-      
+
       <div className="flex gap-2">
         <input
           type="file"
@@ -164,7 +178,7 @@ const ChatInterface: React.FC = () => {
           onChange={(e) => e.target.files && handleFiles(e.target.files)}
           multiple
         />
-        <button 
+        <button
           className="p-2 hover:bg-gray-100 rounded"
           onClick={() => fileInputRef.current?.click()}
         >
@@ -173,13 +187,18 @@ const ChatInterface: React.FC = () => {
         <input
           type="text"
           value={input}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
-          onKeyPress={(e: React.KeyboardEvent) => e.key === 'Enter' && handleSend()}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setInput(e.target.value)
+          }
+          onKeyPress={(e: React.KeyboardEvent) =>
+            e.key === 'Enter' && handleSend()
+          }
           placeholder="Type a message..."
           className="flex-1 p-2 border rounded"
         />
-        <button 
+        <button
           onClick={handleSend}
+          disabled={isLoading}
           className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           <Send size={20} />
@@ -190,9 +209,15 @@ const ChatInterface: React.FC = () => {
         <div className="mt-2 p-2 border rounded-lg bg-gray-100 text-sm">
           <strong>Attached files:</strong>
           {files.map((file, index) => (
-            <div key={index} className="flex items-center justify-between text-xs">
-              {file.name} 
-              <button onClick={() => removeFile(index)} className="text-red-500 ml-2">
+            <div
+              key={index}
+              className="flex items-center justify-between text-xs"
+            >
+              {file.name}
+              <button
+                onClick={() => removeFile(index)}
+                className="text-red-500 ml-2"
+              >
                 <X size={14} />
               </button>
             </div>
