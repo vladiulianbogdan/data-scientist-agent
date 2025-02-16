@@ -36,13 +36,25 @@ const ChatInterface: React.FC = () => {
     setIsLoading(true);
     setMessages((prev) => [...prev, LOADING_MESSAGE]);
 
-    // API request
-    const answers: any = await sendMessageToServer(newMessage);
-    setMessages((prev) => [
-      ...prev.filter((msg) => msg !== LOADING_MESSAGE),
-      ...answers,
-    ]);
-    setIsLoading(false);
+    try {
+      // API request
+      const answers: any = await sendMessageToServer(newMessage);
+      setMessages((prev) => [
+        ...prev.filter((msg) => msg !== LOADING_MESSAGE),
+        ...answers,
+      ]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setMessages((prev) => [
+        ...prev.filter((msg) => msg !== LOADING_MESSAGE),
+        {
+          text: '❌ Error: Failed to send message. Please try again.',
+          sender: 'agent',
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFiles = (newFiles: FileList): void => {
@@ -79,38 +91,33 @@ const ChatInterface: React.FC = () => {
       }
     }
 
-    try {
-      const response = await fetch(
-        import.meta.env.VITE_API_URL_FASTAPI + '/generate',
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
+    const response = await fetch(
+      import.meta.env.VITE_API_URL_FASTAPI + '/generate',
+      {
+        method: 'POST',
+        body: formData,
       }
+    );
 
-      const responseData = await response.json();
-
-      // Extract messages and files
-      const message: Message = {
-        text: responseData.messages[responseData.messages.length - 1],
-        sender: 'agent',
-        files: [],
-        images: [],
-      };
-
-      for (const x of Object.keys(responseData.files)) {
-        message.images!.push('data:image/png;base64,' + responseData.files[x]);
-      }
-
-      return [message];
-    } catch (error) {
-      console.error('Error sending message:', error);
-      return [];
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.statusText}`);
     }
+
+    const responseData = await response.json();
+
+    // Extract messages and files
+    const message: Message = {
+      text: responseData.messages[responseData.messages.length - 1],
+      sender: 'agent',
+      files: [],
+      images: [],
+    };
+
+    for (const x of Object.keys(responseData.files)) {
+      message.images!.push('data:image/png;base64,' + responseData.files[x]);
+    }
+
+    return [message];
   };
 
   const MessageContent: React.FC<{ message: Message }> = ({ message }) => (
