@@ -48,7 +48,7 @@ const ChatInterface: React.FC = () => {
       setMessages((prev) => [
         ...prev.filter((msg) => msg !== LOADING_MESSAGE),
         {
-          text: '❌ Error: Failed to send message. Please try again.',
+          text: '❌ Error: Failed to process request. Ensure your Anthropic Claude API Key is set and valid. Try again.',
           sender: 'agent',
         },
       ]);
