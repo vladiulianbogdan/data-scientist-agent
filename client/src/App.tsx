@@ -106,7 +106,7 @@ const ChatInterface: React.FC = () => {
     const responseData = await response.json();
 
     // Extract messages and files
-    const message: Message = {
+    const receivedMessage: Message = {
       text: responseData.messages[responseData.messages.length - 1],
       sender: 'agent',
       files: [],
@@ -114,10 +114,12 @@ const ChatInterface: React.FC = () => {
     };
 
     for (const x of Object.keys(responseData.files)) {
-      message.images!.push('data:image/png;base64,' + responseData.files[x]);
+      receivedMessage.images!.push(
+        'data:image/png;base64,' + responseData.files[x]
+      );
     }
 
-    return [message];
+    return [receivedMessage];
   };
 
   const MessageContent: React.FC<{ message: Message }> = ({ message }) => (
